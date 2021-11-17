@@ -12,9 +12,9 @@ from statistics import mean
 seed = 4587955
 alpha = 0.3
 shutdown = 3
-chance_remove = 0.5
-shutdown_percent = 0.1
-reopen_percent = 0.025
+chance_remove = 0.7
+shutdown_percent = 0.15
+reopen_percent = 0.03
 
 
 class MainWindow:
@@ -28,7 +28,8 @@ class MainWindow:
     adj_lists = None
     p0 = None
 
-    def __init__(self, nodes: int, edges: int, length: int, adj_lists: [], p0: int = 0):
+    # set initial p0 here
+    def __init__(self, nodes: int, edges: int, length: int, adj_lists: [], p0: int = 2):
         self.nodes = nodes
         self.edges = edges
         self.img_max = length
@@ -69,14 +70,14 @@ class MainWindow:
 
         self.edge_txt = tk.Text(frame, height=1, width=5, wrap='none')
         self.edge_txt.grid(row=3, column=1, padx=2, pady=2, sticky="W")
-        self.edge_txt.insert('end', "825")
+        self.edge_txt.insert('end', "770")
 
         p0_lbl = tk.Label(frame, text="Patient Zero: ", anchor="center")
         p0_lbl.grid(row=4, column=0, padx=2, pady=2, sticky="E")
 
         self.p0_txt = tk.Text(frame, height=1, width=5, wrap='none')
         self.p0_txt.grid(row=4, column=1, padx=2, pady=2, sticky="W")
-        self.p0_txt.insert('end', "0")
+        self.p0_txt.insert('end', "2")
 
         new_p0_btn = tk.Button(frame, text="Change Patient Zero",
                                anchor="center", command=self.update_patient0)
@@ -212,7 +213,8 @@ class MainWindow:
         if self.txt_check():
             self.p0 = int(self.p0_txt.get("1.0", 'end-1c'))
             # edg_list = get_edge_list("input2.txt")
-            edg_list = get_edge_list("PM8ps1Test.txt")
+            # edg_list = get_edge_list("PM8ps1Test.txt")
+            edg_list = get_edge_list("PM1ps1.txt")
             # epi_log = run_epi(self.adj_lists, self.nodes, self.p0)
             epi_log, _, _, _ = run_epi_reopen(
                 self.adj_lists, self.nodes, self.p0)
@@ -496,7 +498,7 @@ def infected(sick: int):
     return False
 
 
-def run_epis(adj_lists, nodes, p0: int = 0):
+def run_epis(adj_lists, nodes, p0: int = 2):
     epidemics = 50
     epi_logs = []
     lengths = []
@@ -677,7 +679,7 @@ original epidemic code
 #     return epi_log
 
 
-def run_epi(adj_lists: [], nodes: int, p0: int = 0):
+def run_epi(adj_lists: [], nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -742,7 +744,7 @@ def run_epi(adj_lists: [], nodes: int, p0: int = 0):
     return epi_log
 
 
-def run_epi_percent(adj_lists: [], nodes: int, p0: int = 0):
+def run_epi_percent(adj_lists: [], nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -808,7 +810,7 @@ def run_epi_percent(adj_lists: [], nodes: int, p0: int = 0):
     return epi_log, ttl_infected, lockdown_step
 
 
-def run_epi_reopen(adj_lists: [], nodes: int, p0: int = 0):
+def run_epi_reopen(adj_lists: [], nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -909,13 +911,15 @@ def main():
     rand.seed(seed)
     nodes = 128
     # edges = 719
-    edges = 825
+    edges = 770
     # adj_lists = make_lists("input2.txt")
-    adj_lists = make_lists("PM8ps1Test.txt")
+    # adj_lists = make_lists("PM8ps1Test.txt")
+    adj_lists = make_lists("PM1ps1.txt")
     # adj_lists, nodes = powerlaw_cluster("edgelists.txt", nodes, edges, 0.2)
     # adj_lists, nodes = watts_stogatz("edgelists.txt", nodes, 4, 0.2)
     # adj_lists, nodes = erdos_renyi("edgelists.txt", nodes, 0.05)
-    edg_list = get_edge_list("PM8ps1Test.txt")
+    # edg_list = get_edge_list("PM8ps1Test.txt")
+    edg_list = get_edge_list("PM1ps1.txt")
     # edg_list = get_edge_list("input2.txt")
 
     # epi_log = run_epi(adj_lists, nodes)
