@@ -19,13 +19,13 @@ from typing import List, Set, Dict, Tuple, Optional
 # seed = 4587955
 alpha = 0.3
 shutdown = 3
-chance_remove = 0.5
-shutdown_percent = 0.05
-reopen_percent = 0.02
+# chance_remove = 0.5
+# shutdown_percent = 0.05
+# reopen_percent = 0.02
 MAX_GENERATIONS = 100
-POP_SIZE = 101
-CROSSOVER_RATE = 0.50
-MUT_RATE = 0.50
+# POP_SIZE = 101
+# CROSSOVER_RATE = 0.50
+# MUT_RATE = 0.50
 
 p0 = int(sys.argv[1])
 graph_inp = sys.argv[2]
@@ -231,18 +231,50 @@ def make_adj_lists(inp: str):
     return adj_lists
 
 
-def init_pop(edge_count: int, percent_lockdown: float, pop_size: int) -> list[int]:
+def check_dup(testlist):
+    for i in testlist:
+        if (testlist.count(i) > 1):
+            return True
+    return False
+
+
+def init_pop(edge_count: int, percent_lockdown: float, pop_size: int, edg_list: list[(int, int)]) -> list[int]:
     # total_edges = list(range(edge_count))
-    total_edges = [1 for i in range(edge_count)]
+    total_edges = [1 for i in range(len(edg_list))]
     pop = []
     for i in range(pop_size):
         new_ind = total_edges.copy()
-        numb_remove = int(percent_lockdown * edge_count)
-        remove_list = random.sample(list(enumerate(new_ind)), numb_remove)
-        for j in remove_list:
-            new_ind[j[0]] = 0
+        numb_remove = int(percent_lockdown * len(edg_list))
+        count = 0
+        rem_list = []
+        count2 = 0
+        while count < numb_remove:
+            tmp1 = random.randint(0, len(new_ind)-1)
+            count2 += 1
+            if tmp1 not in rem_list:
+                second_val = edg_list[tmp1][1]
+                candidates = []
+                for i in range(len(edg_list)):
+                    if edg_list[i][0] == second_val and edg_list[i][1] == edg_list[tmp1][0]:
+                        candidates.append(i)
+                second_idx = random.choice(candidates)
+                while second_idx not in rem_list:
+                    rem_list.append(tmp1)
+                    rem_list.append(second_idx)
+                    count += 2
+
+        # debug tests
+        # test = False
+        # if check_dup(rem_list):
+        #     test = True
+        for j in rem_list:
+            new_ind[j] = 0
 
         pop.append(new_ind)
+        # debug tests
+        # zeros = new_ind.count(0)
+        # ones = new_ind.count(1)
+        # zeros = new_ind.count(0)
     return pop
 
 # safe dealer based crossover
@@ -286,7 +318,7 @@ def sdb(individual1: list[int], individual2: list[int], cross_chance: float) -> 
 '''index swap mutation, will swap 2 pairs of indices'''
 
 
-def mutate(indiv: list[int], chance_mut: float) -> list[int]:
+def mutate(indiv: list[int], chance_mut: float, edg_list: list[(int, int)]) -> list[int]:
     result = copy.deepcopy(indiv)
     if random.random() < chance_mut:
         # numb = random.randint(1, 5)
@@ -327,10 +359,10 @@ def remove_edge_adj(v1: int, v2: int, adjlist: list[list[int]]) -> list[list[int
         workinglist[v1].remove(v2)
     except ValueError:
         pass
-    try:
-        workinglist[v2].remove(v1)
-    except ValueError:
-        pass
+    # try:
+    #     workinglist[v2].remove(v1)
+    # except ValueError:
+    #     pass
     return workinglist
 
 # tournament selection
@@ -389,10 +421,14 @@ def make_graph(inp: list, out: str, inf: list, rem: list):
 
 def make_disconnected_graph(adjlist: list, remove_list: list, edgelist: list) -> list:
     temp_list = copy.deepcopy(adjlist)
+    count2 = remove_list.count(1)
     for idx, edge in enumerate(remove_list):
         if edge == 0:
             x = edgelist[idx][0]
             y = edgelist[idx][1]
+            sumy = 0
+            for i in temp_list:
+                sumy += len(i)
             temp_list = remove_edge_adj(x, y, temp_list)
     return temp_list
 
@@ -485,7 +521,7 @@ def main():
     # output = "logfile.txt"
 
     # GA logic
-    pop = init_pop((edges_numb*2), chance_remove, POP_SIZE)
+    pop = init_pop(edges_numb, chance_remove, POP_SIZE, edgelist)
     numbones = pop[0].count(0)
     # evaluate all candidates in the population
     p0 = 19
@@ -532,7 +568,7 @@ def main():
                 # cross/mut
                 for c in sdb(p1, p2, CROSSOVER_RATE):
                     # mutate
-                    tmp = mutate(c, MUT_RATE)
+                    tmp = mutate(c, MUT_RATE, edgelist)
                     children.append(tmp)
             pop = children
             print("gen: " + str(gen) + " best: " + str(best_eval) + " mean: " +
@@ -543,12 +579,18 @@ def main():
     run_epis(adjlist, node_numb, p0, elite, edgelist, output)
     discon = make_disconnected_graph(adjlist, elite, edgelist)
     count = sum([len(listElem) for listElem in discon])
+    count = 0
+    for i in discon:
+        count += len(i)
+    count2 = elite.count(1)
+    print("Test count of edges: " + str(count2))
+    # ones = new_ind.count(1)
     count2 = sum([len(listElem) for listElem in adjlist])
     count3 = elite.count(0)
     graph_file = output + str(seed) + "graph.dat"
     with open(graph_file, 'w') as f:
         print("nodes: " + str(node_numb) +
-              " edges: " + str(int(count/2)), file=f)
+              " edges: " + str(int(count)), file=f)
         for i in discon:
             for j in i:
                 print(str(j) + " ", end="", file=f)
