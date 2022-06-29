@@ -1,0 +1,8 @@
+512N_graph3strictgen3rem50_685464.csv
+512N_graph3strictgen3rem70_371293.csv
+512N_graph3mediumgen3rem50_799708.csv
+512N_graph3mediumgen3rem70_285610.csv
+512N_graph3laxgen3rem50_542659.csv
+512N_graph3laxgen3rem70_456976.csv
+512N_graph3leerygen3rem50_685464.csv
+512N_graph3leerygen3rem70_828269.csv

@@ -1,0 +1,8 @@
+256N_graph22strictgen3rem50_114244.csv
+256N_graph22strictgen3rem70_571220.csv
+256N_graph22mediumgen3rem50_799708.csv
+256N_graph22mediumgen3rem70_542659.csv
+256N_graph22laxgen3rem50_199927.csv
+256N_graph22laxgen3rem70_771147.csv
+256N_graph22leerygen3rem50_856830.csv
+256N_graph22leerygen3rem70_371293.csv

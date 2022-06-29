@@ -4,6 +4,7 @@ import math
 import random
 import sys
 import numpy
+import csv
 # import pandas as pd
 from math import exp, log
 import matplotlib.pyplot
@@ -22,7 +23,7 @@ shutdown = 3
 # chance_remove = 0.5
 # shutdown_percent = 0.05
 # reopen_percent = 0.02
-MAX_GENERATIONS = 20
+MAX_GENERATIONS = 100
 # POP_SIZE = 101
 # CROSSOVER_RATE = 0.50
 # MUT_RATE = 0.50
@@ -246,8 +247,10 @@ def init_pop(edge_count: int, percent_lockdown: float, pop_size: int, edg_list: 
         new_ind = total_edges.copy()
         numb_remove = int(percent_lockdown * edge_count)
         remove_list = random.sample(list(enumerate(new_ind)), numb_remove)
+        
         for j in remove_list:
             new_ind[j[0]] = 0
+        testcount = new_ind.count(1)
         pop.append(new_ind)
 
         # debug tests
@@ -501,7 +504,7 @@ def run_epis(adj_lists, nodes, p0: int = 2, remove_list: list[int] = [], edge_li
     plot.plot(x, avg_all, label="Average of All")
     fig.suptitle(
         "Epidemic Profiles for 50 Epidemics")
-    plot.set_ylabel("Newely Infected Individuals")
+    plot.set_ylabel("Newly Infected Individuals")
     plot.set_xlabel("Day \n DATA:[Avg Lockdown: " +
                     str(avg_stops) + " Avg Infected: " + str(avg_total) + " Avg Reopen: " + str(avg_reopen) + "]")
     plot.set_xticks(x)
@@ -521,59 +524,68 @@ def main():
 
     # GA logic
     pop = init_pop(edges_numb, chance_remove, POP_SIZE, edgelist)
+    random_ind = copy.deepcopy(pop[5])
     numbones = pop[0].count(0)
     # evaluate all candidates in the population
-    p0 = 19
+    # p0 = 19
     best_eval = 99999
     elite = []
     best = []
     logfile = output + str(seed) + "log.txt"
+    csvfile = output + str(seed) + ".csv"
     with open(logfile, 'w') as f:
+        with open(csvfile, mode='w') as datafile:
+            csvwriter = csv.writer(datafile)
+            csvwriter.writerow(["Generation", "mean", "best"])
+            for gen in range(MAX_GENERATIONS):
+                # fitness
+                scores = []
+                for i in pop:
+                    tmp = 0
+                    # run 10 epidemics and only include those with length >= 5
+                    for j in range(10):
 
-        for gen in range(MAX_GENERATIONS):
-            # fitness
-            scores = []
-            for i in pop:
-                tmp = 0
-                # run 10 epidemics and only include those with length >= 5
-                for j in range(10):
+                        fit = 99999
+                        while fit >= 9999:
+                            _, score, _, _ = fitness_reopen(
+                                adjlist, node_numb, p0, i, edgelist)
+                            if score >= 5:
+                                tmp = tmp + score
+                                fit = score
+                    fitness = tmp/10
+                    scores.append(fitness)
 
-                    fit = 99999
-                    while fit >= 9999:
-                        _, score, _, _ = fitness_reopen(
-                            adjlist, node_numb, p0, i, edgelist)
-                        if score >= 5:
-                            tmp = tmp + score
-                            fit = score
-                fitness = tmp/10
-                scores.append(fitness)
+                # find best individual
+                for i in range(POP_SIZE):
+                    if scores[i] < best_eval:
+                        elite, best_eval = pop[i], scores[i]
+                        print("gen >%d, new best = %.3f" % (gen, scores[i]))
+                        print("gen >%d, new best = %.3f" %
+                              (gen, scores[i]), file=f)
+                # select parents
+                # selected = [selection(pop, scores, 7) for _ in range(POP_SIZE)]
+                children = list()
+                children.append(elite)
+                for i in range(0, POP_SIZE-1, 2):
+                    # pairs of parents
+                    p1 = selection(pop, scores, 7)
+                    p2 = selection(pop, scores, 7)
+                    # p1, p2 = selected[i], selected[i+1]
+                    # cross/mut
+                    for c in sdb(p1, p2, CROSSOVER_RATE):
+                        # mutate
+                        tmp = mutate(c, MUT_RATE, edgelist)
+                        children.append(tmp)
+                pop = children
+                print("gen: " + str(gen) + " best: " + str(best_eval) + " mean: " +
+                      str(mean(scores)))
+                print("gen: " + str(gen) + " best: " + str(best_eval) + " mean: " +
+                      str(mean(scores)), file=f)
+                csvwriter.writerow([gen, mean(scores), best_eval])
+            rand_result = fitness_reopen(adjlist, node_numb, p0, random_ind, edgelist)
+            csvwriter.writerow(["random", rand_result])
 
-            # find best individual
-            for i in range(POP_SIZE):
-                if scores[i] < best_eval:
-                    elite, best_eval = pop[i], scores[i]
-                    print("gen >%d, new best = %.3f" % (gen, scores[i]))
-                    print("gen >%d, new best = %.3f" %
-                          (gen, scores[i]), file=f)
-            # select parents
-            # selected = [selection(pop, scores, 7) for _ in range(POP_SIZE)]
-            children = list()
-            children.append(elite)
-            for i in range(0, POP_SIZE-1, 2):
-                # pairs of parents
-                p1 = selection(pop, scores, 7)
-                p2 = selection(pop, scores, 7)
-                # p1, p2 = selected[i], selected[i+1]
-                # cross/mut
-                for c in sdb(p1, p2, CROSSOVER_RATE):
-                    # mutate
-                    tmp = mutate(c, MUT_RATE, edgelist)
-                    children.append(tmp)
-            pop = children
-            print("gen: " + str(gen) + " best: " + str(best_eval) + " mean: " +
-                  str(mean(scores)))
-            print("gen: " + str(gen) + " best: " + str(best_eval) + " mean: " +
-                  str(mean(scores)), file=f)
+
 
     run_epis(adjlist, node_numb, p0, elite, edgelist, output)
     discon = make_disconnected_graph(adjlist, elite, edgelist)

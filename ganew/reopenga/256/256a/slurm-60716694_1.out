@@ -1,0 +1,8 @@
+Defaulting to user installation because normal site-packages is not writeable
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/avx2, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: graphviz in /home/js17sy/.local/lib/python3.10/site-packages (0.20)
+1; python ga.py 10 256N_graph10.dat 0.025 0.01 0.5 0.5 0.5 201 256N_graph10strictgen1rem50_ 28561
+/project/6008788/js17sy/reopenga/256a/ga.py:291: DeprecationWarning: Sampling from a set deprecated
+since Python 3.9 and will be removed in a subsequent version.
+  child1 = set(random.sample(
+slurmstepd: error: *** JOB 60716708 ON gra28 CANCELLED AT 2022-05-11T10:51:04 ***

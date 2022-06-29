@@ -1,0 +1,2 @@
+Exp	Best	Mean	StdDev
+512a_random50graph.dat	2	313.6774193548387	59.0278158032428

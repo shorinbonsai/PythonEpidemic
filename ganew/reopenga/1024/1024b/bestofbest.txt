@@ -1,0 +1,8 @@
+1024N_graph24strictgen3rem50_85683.csv
+1024N_graph24strictgen3rem70_57122.csv
+1024N_graph24mediumgen3rem50_199927.csv
+1024N_graph24mediumgen3rem70_514098.csv
+1024N_graph24laxgen3rem50_257049.csv
+1024N_graph24laxgen3rem70_257049.csv
+1024N_graph24leerygen3rem50_485537.csv
+1024N_graph24leerygen3rem70_742586.csv

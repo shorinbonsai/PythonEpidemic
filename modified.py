@@ -29,7 +29,7 @@ class MainWindow:
     p0 = None
 
     # set initial p0 here
-    def __init__(self, nodes: int, edges: int, length: int, adj_lists: [], p0: int = 2):
+    def __init__(self, nodes: int, edges: int, length: int, adj_lists: list, p0: int = 2):
         self.nodes = nodes
         self.edges = edges
         self.img_max = length
@@ -430,7 +430,7 @@ def powerlaw_cluster(filename: str, nodes: int, edges: int, beta: float):
     return adj_lists, nodes
 
 
-def make_graph(inp: [], out: str, inf: [], rem: []):
+def make_graph(inp: list, out: str, inf: list, rem: list):
     g = Graph(engine='sfdp')
     g.attr(size="6,6")
     g.graph_attr.update(dpi='600', overlap='false')
@@ -460,7 +460,7 @@ def make_graph(inp: [], out: str, inf: [], rem: []):
     pass
 
 
-def get_edge_list(inp: str) -> []:
+def get_edge_list(inp: str) -> list:
     with open(inp, "r") as f:
         first_line = f.readline()
         nodes = int(first_line.rstrip().split('\t')[0].split(' ')[1])
@@ -480,7 +480,7 @@ def get_edge_list(inp: str) -> []:
     return edg_list
 
 
-def make_graphs(inp: [], epi_log: []):
+def make_graphs(inp: list, epi_log: list):
     removed = []
     for num, li in enumerate(epi_log):
         make_graph(inp, "graph" + str(num), li, removed)
@@ -679,7 +679,7 @@ original epidemic code
 #     return epi_log
 
 
-def run_epi(adj_lists: [], nodes: int, p0: int = 2):
+def run_epi(adj_lists: list, nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -744,7 +744,7 @@ def run_epi(adj_lists: [], nodes: int, p0: int = 2):
     return epi_log
 
 
-def run_epi_percent(adj_lists: [], nodes: int, p0: int = 2):
+def run_epi_percent(adj_lists: list, nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -810,7 +810,7 @@ def run_epi_percent(adj_lists: [], nodes: int, p0: int = 2):
     return epi_log, ttl_infected, lockdown_step
 
 
-def run_epi_reopen(adj_lists: [], nodes: int, p0: int = 2):
+def run_epi_reopen(adj_lists: list, nodes: int, p0: int = 2):
     temp_list = copy.deepcopy(adj_lists)
     n_state = [0 for _ in range(nodes)]  # susceptible
     n_state[p0] = 1
@@ -886,7 +886,7 @@ def run_epi_reopen(adj_lists: [], nodes: int, p0: int = 2):
     return epi_log, ttl_infected, lockdown_step, reopen_step
 
 
-def make_lists(inp: str) -> []:
+def make_lists(inp: str):
     with open(inp, "r") as f:
         first_line = f.readline()
         nodes = int(first_line.rstrip().split('\t')[0].split(' ')[1])
